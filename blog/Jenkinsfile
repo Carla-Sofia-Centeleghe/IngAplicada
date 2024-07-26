@@ -9,10 +9,14 @@ node {
         sh "java -version"
     }
 
+    stage('prepare mvnw') {
+        sh "chmod +x ./mvnw"
+    }
+
     stage('clean') {
-        sh "chmod +x mvnw"
         sh "./mvnw -ntp clean -P-webapp"
     }
+
     stage('nohttp') {
         sh "./mvnw -ntp checkstyle:check"
     }
@@ -24,6 +28,7 @@ node {
     stage('npm install') {
         sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm"
     }
+
     stage('backend tests') {
         try {
             sh "./mvnw -ntp verify -P-webapp"
@@ -54,6 +59,6 @@ node {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
             sh "./mvnw -ntp jib:build"
         }
-    
     }
 }
+
