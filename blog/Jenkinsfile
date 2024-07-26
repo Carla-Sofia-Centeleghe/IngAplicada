@@ -3,18 +3,17 @@
 pipeline {
     agent {
         docker {
-            image 'carlacente/jhipster:latest' // Reemplaza esto con la ruta de tu imagen
+            image 'carla-sofia-centeleghe/jhipster:latest' // Asegúrate de usar la imagen correcta
             args '-v $HOME/.m2:/root/.m2' // Mapea el directorio .m2 para evitar descargar dependencias cada vez
         }
     }
-
     stages {
         stage('checkout') {
             steps {
                 checkout scm
             }
         }
-
+        
         stage('install dependencies') {
             steps {
                 sh """
@@ -37,7 +36,7 @@ pipeline {
 
         stage('clean') {
             steps {
-                sh "./mvnw -ntp clean -P-webapp"
+                sh "./mvnw -ntp clean -Pwebapp"
             }
         }
 
@@ -62,7 +61,7 @@ pipeline {
         stage('backend tests') {
             steps {
                 try {
-                    sh "./mvnw -ntp verify -P-webapp"
+                    sh "./mvnw -ntp verify -Pwebapp"
                 } catch(err) {
                     throw err
                 } finally {
@@ -85,7 +84,7 @@ pipeline {
 
         stage('packaging') {
             steps {
-                sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
+                sh "./mvnw -ntp verify -Pwebapp -Pprod -DskipTests"
                 archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
             }
         }
@@ -99,4 +98,3 @@ pipeline {
         }
     }
 }
-
