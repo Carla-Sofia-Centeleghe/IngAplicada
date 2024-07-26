@@ -1,73 +1,101 @@
 #!/usr/bin/env groovy
 
-node {
-    stage('checkout') {
-        checkout scm
-    }
-
-    stage('install dependencies') {
-        sh """
-        # Instala Node.js
-        curl -sL https://deb.nodesource.com/setup_14.x | bash -
-        sudo apt-get install -y nodejs
-        # Instala JHipster
-        npm install -g jhipster@7.4.1
-        """
-    }
-
-    stage('check java') {
-        sh "java -version"
-    }
-
-    stage('prepare mvnw') {
-        sh "chmod +x ./mvnw"
-    }
-
-    stage('clean') {
-        sh "./mvnw -ntp clean -P-webapp"
-    }
-
-    stage('nohttp') {
-        sh "./mvnw -ntp checkstyle:check"
-    }
-
-    stage('install tools') {
-        sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm"
-    }
-
-    stage('npm install') {
-        sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm"
-    }
-
-    stage('backend tests') {
-        try {
-            sh "./mvnw -ntp verify -P-webapp"
-        } catch(err) {
-            throw err
-        } finally {
-            junit '**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml'
+pipeline {
+    agent {
+        docker {
+            image 'carlacente/jhipster:latest' // Reemplaza esto con la ruta de tu imagen
+            args '-v $HOME/.m2:/root/.m2' // Mapea el directorio .m2 para evitar descargar dependencias cada vez
         }
     }
 
-    stage('frontend tests') {
-        try {
-            sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dfrontend.npm.arguments='run test'"
-        } catch(err) {
-            throw err
-        } finally {
-            junit '**/target/test-results/TESTS-results-jest.xml'
+    stages {
+        stage('checkout') {
+            steps {
+                checkout scm
+            }
         }
-    }
 
-    stage('packaging') {
-        sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
-        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
-    }
+        stage('install dependencies') {
+            steps {
+                sh """
+                # No es necesario instalar Node.js ni JHipster, ya están en la imagen
+                """
+            }
+        }
 
-    def dockerImage
-    stage('publish docker') {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
-            sh "./mvnw -ntp jib:build"
+        stage('check java') {
+            steps {
+                sh "java -version"
+            }
+        }
+
+        stage('prepare mvnw') {
+            steps {
+                sh "chmod +x ./mvnw"
+            }
+        }
+
+        stage('clean') {
+            steps {
+                sh "./mvnw -ntp clean -P-webapp"
+            }
+        }
+
+        stage('nohttp') {
+            steps {
+                sh "./mvnw -ntp checkstyle:check"
+            }
+        }
+
+        stage('install tools') {
+            steps {
+                sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm"
+            }
+        }
+
+        stage('npm install') {
+            steps {
+                sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm"
+            }
+        }
+
+        stage('backend tests') {
+            steps {
+                try {
+                    sh "./mvnw -ntp verify -P-webapp"
+                } catch(err) {
+                    throw err
+                } finally {
+                    junit '**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml'
+                }
+            }
+        }
+
+        stage('frontend tests') {
+            steps {
+                try {
+                    sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dfrontend.npm.arguments='run test'"
+                } catch(err) {
+                    throw err
+                } finally {
+                    junit '**/target/test-results/TESTS-results-jest.xml'
+                }
+            }
+        }
+
+        stage('packaging') {
+            steps {
+                sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
+                archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+            }
+        }
+
+        stage('publish docker') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+                    sh "./mvnw -ntp jib:build"
+                }
+            }
         }
     }
 }
