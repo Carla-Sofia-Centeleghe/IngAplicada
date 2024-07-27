@@ -1,16 +1,9 @@
-#!/usr/bin/env groovy
 pipeline {
     agent any
     environment {
         DOCKER_IMAGE = 'carla-sofia-centeleghe/jhipster:latest' // Asegúrate de usar la imagen correcta
     }
     stages {
-        stage('checkout') {
-            steps {
-                checkout scm
-            }
-        }
-        
         stage('use docker') {
             agent {
                 docker {
@@ -19,6 +12,12 @@ pipeline {
                 }
             }
             stages {
+                stage('checkout') {
+                    steps {
+                        checkout scm
+                    }
+                }
+
                 stage('install dependencies') {
                     steps {
                         sh """
@@ -109,3 +108,4 @@ pipeline {
         }
     }
 }
+
