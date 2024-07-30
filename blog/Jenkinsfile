@@ -10,6 +10,7 @@ node {
     }
 
     stage('clean') {
+        sh "cd blog"
         sh "chmod +x mvnw"
         sh "./mvnw -ntp clean -P-webapp"
     }
