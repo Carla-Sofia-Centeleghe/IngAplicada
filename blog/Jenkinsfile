@@ -46,7 +46,7 @@ node {
         }
     }
 
-    stage('frontend tests') {
+      stage('frontend tests') {
         dir('blog') {
             try {
                 sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm@npm -Dfrontend.npm.arguments='run test'"
@@ -56,6 +56,7 @@ node {
                 junit '**/target/test-results/TESTS-results-jest.xml'
             }
         }
+    }
 
     stage('packaging') {
         dir('blog') {
