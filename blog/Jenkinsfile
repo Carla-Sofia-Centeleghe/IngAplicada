@@ -10,53 +10,71 @@ node {
     }
 
     stage('clean') {
-        sh "chmod +x blog/mvnw"
-        sh "./blog/mvnw -ntp clean -P-webapp"
+        dir('blog') {
+            sh "chmod +x mvnw"
+            sh "./mvnw -ntp clean -P-webapp"
+        }
     }
 
     stage('nohttp') {
-        sh "./blog/mvnw -ntp checkstyle:check"
+        dir('blog') {
+            sh "./mvnw -ntp checkstyle:check"
+        }
     }
 
     stage('install tools') {
-        sh "./blog/mvnw -ntp com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm"
+        dir('blog') {
+            sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:install-node-and-npm@install-node-and-npm"
+        }
     }
 
     stage('npm install') {
-        sh "./blog/mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm"
+        dir('blog') {
+            sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm"
+        }
     }
+
     stage('backend tests') {
-        try {
-            sh "./blog/mvnw -ntp verify -P-webapp"
-        } catch(err) {
-            throw err
-        } finally {
-            junit '**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml'
+        dir('blog') {
+            try {
+                sh "./mvnw -ntp verify -P-webapp"
+            } catch(err) {
+                throw err
+            } finally {
+                junit '**/target/surefire-reports/TEST-*.xml,**/target/failsafe-reports/TEST-*.xml'
+            }
         }
     }
 
     stage('frontend tests') {
-        try {
-            sh "./blog/mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dfrontend.npm.arguments='run test'"
-        } catch(err) {
-            throw err
-        } finally {
-            junit '**/target/test-results/TESTS-results-jest.xml'
+        dir('blog') {
+            try {
+                sh "./mvnw -ntp com.github.eirslett:frontend-maven-plugin:npm -Dfrontend.npm.arguments='run test'"
+            } catch(err) {
+                throw err
+            } finally {
+                junit '**/target/test-results/TESTS-results-jest.xml'
+            }
         }
     }
 
     stage('packaging') {
-        sh "./blog/mvnw -ntp verify -P-webapp -Pprod -DskipTests"
-        archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+        dir('blog') {
+            sh "./mvnw -ntp verify -P-webapp -Pprod -DskipTests"
+            archiveArtifacts artifacts: '**/target/*.jar', fingerprint: true
+        }
     }
 
     def dockerImage
     stage('publish docker') {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable:
-            'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
-                sh "./blog/mvnw -ntp jib:build"
+        dir('blog') {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable:
+                'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+                    sh "./mvnw -ntp jib:build"
             }
+        }
     }
 
 }
+
 
