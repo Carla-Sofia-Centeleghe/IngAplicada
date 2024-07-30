@@ -406,7 +406,7 @@
                         </from>
 
                         <to>
-                             <image>Carla-Sofia-Centeleghe/IngAplicada:latest</image>
+                             <image>carla-sofia-centeleghe/ingaplicada:latest</image>
                             <tags>
                                 <tag>${project.version}</tag>
                                 <tag>latest</tag>
