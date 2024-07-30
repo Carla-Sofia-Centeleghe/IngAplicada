@@ -83,24 +83,27 @@ pipeline {
             }
         }
 
-        stage('frontend tests') {
+       stage('Frontend Tests') {
             steps {
                 script {
                     dir('blog') { 
                         try {
-                            timeout(time: 60, unit: 'MINUTES') { 
-                                sh 'npm install'
-                                sh 'npm run test'
-                            }
-                        } catch(err) {
+                            // Instalación de dependencias
+                            sh 'npm install'
+                            
+                            // Ejecutar tests de frontend
+                            sh 'npm run test -- --ci --reporters jest-junit --outputFile=TESTS-results-jest.xml'
+                        } catch (err) {
                             throw err
                         } finally {
-                            junit '**/target/test-results/TESTS-results-jest.xml'
+                            // Publicar los resultados de los tests
+                            junit '**/TESTS-results-jest.xml'
                         }
                     }
                 }
             }
         }
+
 
         stage('Packaging') {
             steps {
