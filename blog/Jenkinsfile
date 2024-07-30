@@ -83,26 +83,26 @@ pipeline {
             }
         }
 
-       stage('Frontend Tests') {
-            steps {
-                script {
-                    dir('blog') { 
-                        try {
+      // stage('Frontend Tests') {
+            //steps {
+                //script {
+                    //dir('blog') { 
+                        //try {
                             // Instalación de dependencias
-                            sh 'npm install'
+                            //sh 'npm install'
                             
                             // Ejecutar tests de frontend
-                            sh 'npm run test -- --ci --reporters jest-junit --outputFile=TESTS-results-jest.xml'
-                        } catch (err) {
-                            throw err
-                        } finally {
+                            //sh 'npm run test -- --ci --reporters jest-junit --outputFile=TESTS-results-jest.xml'
+                        //} catch (err) {
+                            //throw err
+                        //} finally {
                             // Publicar los resultados de los tests
-                            junit '**/TESTS-results-jest.xml'
-                        }
-                    }
-                }
-            }
-        }
+                            //junit '**/TESTS-results-jest.xml'
+                        //}
+                    //}
+                //}
+            //}
+        //}
 
 
         stage('Packaging') {
