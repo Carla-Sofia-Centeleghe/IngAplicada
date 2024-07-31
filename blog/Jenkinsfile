@@ -24,13 +24,11 @@ pipeline {
             }
         }
 
-        stages {
-            stage('Verify Docker Access') {
-                steps {
-                    script {
-                        sh 'docker ps'
+        stage('Verify Docker Access') {
+            steps {
+                script {
+                    sh 'docker ps'
                     }
-                }
             }
         }
 
