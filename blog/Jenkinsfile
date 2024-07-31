@@ -118,10 +118,17 @@ pipeline {
             }
         }
 
-        stage('publish docker') {
-            withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
-                sh "./mvnw -ntp jib:build"
-            }
-        }  
-    } 
+        stage('Publish Docker') {
+                    steps {
+                        script {
+                            dir('blog') {
+                                withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+                                    sh "echo $DOCKER_REGISTRY_PWD | docker login -u $DOCKER_REGISTRY_USER --password-stdin"
+                                    sh "./mvnw -ntp jib:build"
+                                }
+                            }
+                        }
+                    }
+        }
+    }
 }
