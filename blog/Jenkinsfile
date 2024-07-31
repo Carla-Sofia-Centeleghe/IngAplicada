@@ -129,10 +129,10 @@ pipeline {
         stage('Publish Docker') {
                     steps {
                         script {
-                                withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
-                                    sh "echo $DOCKER_REGISTRY_PWD | docker login -u $DOCKER_REGISTRY_USER --password-stdin"
-                                    sh "./mvnw -ntp jib:build"
-                                }
+                            withCredentials([usernamePassword(credentialsId: 'dockerhub-login', passwordVariable: 'DOCKER_REGISTRY_PWD', usernameVariable: 'DOCKER_REGISTRY_USER')]) {
+                                sh "export PATH=\$PATH:/usr/local/bin && echo \$DOCKER_REGISTRY_PWD | docker login -u \$DOCKER_REGISTRY_USER --password-stdin"
+                                sh "./mvnw -ntp jib:build"
+                            }
                         }
                     }
         }
