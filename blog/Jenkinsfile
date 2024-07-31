@@ -16,6 +16,14 @@ pipeline {
             }
         }
 
+        stage('Verify Docker') {
+            steps {
+                script {
+                    sh 'which docker || echo "Docker not found"'
+                }
+            }
+        }
+
         stage('Clean') {
             steps {
                 script {
