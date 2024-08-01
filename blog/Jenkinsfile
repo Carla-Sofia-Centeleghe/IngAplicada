@@ -24,14 +24,7 @@ pipeline {
             }
         }
 
-        stage('Verify Docker Access') {
-            steps {
-                script {
-                    sh 'docker ps'
-                    }
-            }
-        }
-
+        
         stage('Clean') {
             steps {
                 script {
@@ -99,28 +92,6 @@ pipeline {
             }
         }
 
-      // stage('Frontend Tests') {
-            //steps {
-                //script {
-                    //dir('blog') { 
-                        //try {
-                            // Instalación de dependencias
-                            //sh 'npm install'
-                            
-                            // Ejecutar tests de frontend
-                            //sh 'npm run test -- --ci --reporters jest-junit --outputFile=TESTS-results-jest.xml'
-                        //} catch (err) {
-                            //throw err
-                        //} finally {
-                            // Publicar los resultados de los tests
-                            //junit '**/TESTS-results-jest.xml'
-                        //}
-                    //}
-                //}
-            //}
-        //}
-
-
         stage('Packaging') {
             steps {
                 script {
@@ -134,6 +105,7 @@ pipeline {
             }
         }
 
+        
         stage('Publish Docker') {
                     steps {
                         script {
